@@ -2,7 +2,7 @@ name: Flutter web CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ release ]
 
 jobs:
   build:
@@ -37,6 +37,5 @@ jobs:
       run: |
         git config --local user.email "ashishsumancse@gmail.com"
         git config --local user.name "ashishsumann"
-        ls
-        git add build/web && git commit -m "Initial build/web subtree commit"
-        git push origin `git subtree split --prefix build/web master`:gh-pages --force
+        git add build/web && git commit -m "Commit release build CI"
+        git push origin `git subtree split --prefix build/web release`:gh-pages --force
