@@ -1,4 +1,4 @@
-import 'package:animationplayground/anims/rate_us.dart';
+import 'package:animationplayground/shatterglass/shatter_glass.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -27,12 +27,19 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text("Animation Playground", style: TextStyle(color: Colors.white),),
+      home: Container(
+        color: Colors.white,
+        child: ShatterGlass(
+          duration: Duration(seconds: 4),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            child: Image.network(
+              "https://c7.uihere.com/files/282/842/426/wallpaper-iphone-wallpapers-iphone-backgrounds-lock-screen-background.jpg",
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
-        backgroundColor: Colors.white,
-        body: RateUs(),
       ),
     );
   }
