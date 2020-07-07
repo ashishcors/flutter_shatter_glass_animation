@@ -39,6 +39,7 @@ class _FragmentState extends State<Fragment>
       curve: Curves.fastOutSlowIn,
     );
     double signX = _sign(widget.face.centroid.x - widget.posX);
+    print(signX);
     _rx = Tween(begin: 0.0, end: 60.0 * signX).animate(
       CurvedAnimation(
         parent: widget.controller,
