@@ -46,30 +46,29 @@ class _ShatterGlassState extends State<ShatterGlass>
 
   @override
   Widget build(BuildContext context) {
-    print(_controller.value);
     if (!_controller.isAnimating || _controller.isCompleted) {
       return GestureDetector(
         onTapDown: (TapDownDetails details) => onTapDown(context, details),
         child: child,
       );
     }
-//    return faceToFragment(triangulation.faces.first);
+    final Offset origin = Offset(MediaQuery.of(context).size.width / 2,
+        MediaQuery.of(context).size.height / 2);
+
+    int index = 0;
+    final int size = triangulation.faces.length;
+    //TODO create mapIndexed extension
     return Stack(
       children: <Widget>[
         ...triangulation.faces.map((e) {
-          return faceToFragment(e);
+          double delay = (index++ / size) *
+              widget.duration.inSeconds *
+              _randomRange(0.8, 0.9);
+          return Fragment(_controller, _clip(e, child), posX, posY, delay,
+              widget.duration.inSeconds, e, origin);
         }),
       ],
     );
-  }
-
-  Fragment faceToFragment(Face face) {
-    double dx = (face.centroid.x - posX),
-        dy = (face.centroid.y - posY),
-        d = sqrt(dx * dx + dy * dy),
-        delay = d * 0.003 * _randomRange(0.9, 1.1);
-    return Fragment(
-        _controller, child, posX, posY, delay, widget.duration.inSeconds, face);
   }
 
   void onTapDown(BuildContext context, TapDownDetails details) {
@@ -118,5 +117,35 @@ class _ShatterGlassState extends State<ShatterGlass>
   double _randomRange(min, max) {
     double op = min + (max - min) * Random().nextDouble();
     return op;
+  }
+
+  ClipPath _clip(Face face, Widget widget) {
+    return ClipPath(
+      clipper: MyCustomClipper(face),
+      child: widget,
+    );
+  }
+}
+
+class MyCustomClipper extends CustomClipper<Path> {
+  MyCustomClipper(this._face);
+
+  final Face _face;
+
+  @override
+  Path getClip(Size size) {
+    List<Offset> points = [
+      Offset(_face.a.x, _face.a.y),
+      Offset(_face.b.x, _face.b.y),
+      Offset(_face.c.x, _face.c.y),
+    ];
+    Path path = Path();
+    path.addPolygon(points, false);
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return false;
   }
 }

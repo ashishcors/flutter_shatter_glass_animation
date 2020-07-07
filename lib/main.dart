@@ -34,8 +34,11 @@ class MyApp extends StatelessWidget {
           child: Container(
             width: double.infinity,
             height: double.infinity,
-            color: Colors.black54,
-          )
+            child: Image.network(
+              "https://c7.uihere.com/files/282/842/426/wallpaper-iphone-wallpapers-iphone-backgrounds-lock-screen-background.jpg",
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
       ),
     );

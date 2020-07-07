@@ -9,13 +9,14 @@ class Fragment extends StatefulWidget {
   final Widget child;
   final double posX;
   final double posY;
+  final Offset center;
   final double delay;
   final int duration;
   final Face face;
   final AnimationController controller;
 
   const Fragment(this.controller, this.child, this.posX, this.posY, this.delay,
-      this.duration, this.face,
+      this.duration, this.face, this.center,
       {Key key})
       : super(key: key);
 
@@ -25,55 +26,62 @@ class Fragment extends StatefulWidget {
 
 class _FragmentState extends State<Fragment>
     with SingleTickerProviderStateMixin {
-  Animation<double> _animation;
+  Animation<double> _rx;
+  Animation<double> _opacity;
+  Interval curve;
 
   @override
   void initState() {
     super.initState();
-    _animation = Tween(begin: 0.0, end: 1.0).animate(
+    curve = Interval(
+      (widget.delay / widget.duration),
+      1.0,
+      curve: Curves.fastOutSlowIn,
+    );
+    double signX = _sign(widget.face.centroid.x - widget.posX);
+    _rx = Tween(begin: 0.0, end: 60.0 * signX).animate(
       CurvedAnimation(
         parent: widget.controller,
-        curve: Interval(
-          (widget.delay / widget.duration),
-          1.0,
-          curve: Curves.fastOutSlowIn,
-        ),
+        curve: curve,
+      ),
+    );
+    _opacity = Tween(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: widget.controller,
+        curve: curve,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    print("Anim value " + _animation.value.toString());
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (BuildContext context, Widget child) {
-        Face face = widget.face;
-        double dx = (face.centroid.x - widget.posX) * (_animation.value),
-            dy = (face.centroid.y - widget.posY) * (_animation.value),
-            d = sqrt(dx * dx + dy * dy),
-            rx = 30 * _sign(dy) * _animation.value,
-            ry = 90 * -_sign(dx) * _animation.value;
-        return Transform(
-          origin: Offset(face.centroid.x, face.centroid.y),
-          transform: Matrix4.translationValues(dx, dy, d)
-            ..rotateX(rx * pi / 180)
-            ..rotateY(ry * pi / 180),
-          child: _clip(face, widget.child),
-        );
-      },
+    return Stack(children: [
+      AnimatedBuilder(
+        animation: widget.controller,
+        builder: _buildAnimation,
+      ),
+    ]);
+  }
+
+  Widget _buildAnimation(BuildContext context, Widget child) {
+    return Stack(
+      children: [
+        Transform(
+          origin: Offset(widget.center.dx, widget.center.dy * 2),
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.01)
+            ..setRotationX(_rx.value * pi / 180),
+          child: Opacity(
+            opacity: _opacity.value,
+            child: widget.child,
+          ),
+        ),
+      ],
     );
   }
 
   double _sign(x) {
     return x < 0 ? -1 : 1;
-  }
-
-  ClipPath _clip(Face face, Widget widget) {
-    return ClipPath(
-      clipper: MyCustomClipper(face),
-      child: widget,
-    );
   }
 }
 
@@ -94,28 +102,5 @@ class Point extends StatelessWidget {
         color: Colors.red,
       ),
     );
-  }
-}
-
-class MyCustomClipper extends CustomClipper<Path> {
-  MyCustomClipper(this._face);
-
-  final Face _face;
-
-  @override
-  Path getClip(Size size) {
-    List<Offset> points = [
-      Offset(_face.a.x, _face.a.y),
-      Offset(_face.b.x, _face.b.y),
-      Offset(_face.c.x, _face.c.y),
-    ];
-    Path path = Path();
-    path.addPolygon(points, false);
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return false;
   }
 }
