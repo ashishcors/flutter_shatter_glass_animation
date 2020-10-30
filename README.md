@@ -15,4 +15,4 @@ Live at: https://ashishsumann.github.io/flutter_shatter_glass_animation/#/
 ![Android-debug](gif/android-debug.gif)
 
 
-**Note:** The animation didn't turned out to be as smooth as expected.
+**⚠️Note:** The animation didn't turned out to be as smooth as expected.
